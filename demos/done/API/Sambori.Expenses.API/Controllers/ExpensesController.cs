@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +14,7 @@ namespace Sambori.Expenses.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ExpensesController : ControllerBase
     {
         private readonly ExpensesContext _context;
@@ -25,6 +28,7 @@ namespace Sambori.Expenses.API.Controllers
         }
 
         [HttpGet("ping")]
+        [AllowAnonymous]
         public IActionResult Ping()
         {
             var data = $"Expenses Controller API v1.0. Now is: {DateTime.Now}";
@@ -33,6 +37,7 @@ namespace Sambori.Expenses.API.Controllers
         }
 
         [HttpGet("all")]
+        [Authorize("AdminsOnly")]
         public async Task<IActionResult> GetAll()
         {
             var data = await _context.Expenses.ToListAsync();
@@ -50,12 +55,24 @@ namespace Sambori.Expenses.API.Controllers
                 return NotFound();
             }
 
-            return Ok(data);
+            var upn = User.FindFirst(ClaimTypes.Upn)?.Value;
+
+            if (User.HasClaim(ClaimTypes.Role, "Admin") 
+                || User.HasClaim(ClaimTypes.Role, "Approver")
+                || data.User == upn)
+            {
+                return Ok(data);
+            }
+
+            return Unauthorized();
         }
 
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] Expense expense)
         {
+            var upn = User.FindFirst(ClaimTypes.Upn)?.Value;
+            expense.User = upn;
+
             await _context.Expenses.AddAsync(expense);
             await _context.SaveChangesAsync();
 
@@ -63,6 +80,7 @@ namespace Sambori.Expenses.API.Controllers
         }
 
         [HttpGet("{id:guid}/approve")]
+        [Authorize("ApproversOnly")]
         public async Task<IActionResult> Approve(Guid id)
         {
             var data = await _context.Expenses.FindAsync(id);
@@ -80,6 +98,7 @@ namespace Sambori.Expenses.API.Controllers
         }
 
         [HttpGet("{id:guid}/decline")]
+        [Authorize("ApproversOnly")]
         public async Task<IActionResult> Decline(Guid id)
         {
             var data = await _context.Expenses.FindAsync(id);
@@ -97,6 +116,7 @@ namespace Sambori.Expenses.API.Controllers
         }
 
         [HttpDelete("{id:guid}")]
+        [Authorize("AdminsOnly")]
         public async Task<IActionResult> Delete(Guid id)
         {
             var data = await _context.Expenses.FindAsync(id);

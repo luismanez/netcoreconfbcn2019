@@ -7,7 +7,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{C5AB7900-88E
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Clients", "Clients", "{C1DDE7CE-E3DE-46CB-BB00-D212755E0CFF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sambori.Expenses.API", "API\Sambori.Expenses.API\Sambori.Expenses.API.csproj", "{46BFEBF0-CC5C-4905-B39A-1DEF5D393C83}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sambori.Expenses.API", "API\Sambori.Expenses.API\Sambori.Expenses.API.csproj", "{46BFEBF0-CC5C-4905-B39A-1DEF5D393C83}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sambori.Expenses.Management", "Clients\Sambori.Expenses.Management\Sambori.Expenses.Management.csproj", "{2E28FA4F-3CF5-48D2-BBF6-3B1D89878FEF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,12 +21,17 @@ Global
 		{46BFEBF0-CC5C-4905-B39A-1DEF5D393C83}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{46BFEBF0-CC5C-4905-B39A-1DEF5D393C83}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{46BFEBF0-CC5C-4905-B39A-1DEF5D393C83}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E28FA4F-3CF5-48D2-BBF6-3B1D89878FEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E28FA4F-3CF5-48D2-BBF6-3B1D89878FEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E28FA4F-3CF5-48D2-BBF6-3B1D89878FEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E28FA4F-3CF5-48D2-BBF6-3B1D89878FEF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{46BFEBF0-CC5C-4905-B39A-1DEF5D393C83} = {C5AB7900-88E2-4791-8A93-062475052BC7}
+		{2E28FA4F-3CF5-48D2-BBF6-3B1D89878FEF} = {C1DDE7CE-E3DE-46CB-BB00-D212755E0CFF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B769B0D9-FB74-49A9-B95F-EE824081849C}
