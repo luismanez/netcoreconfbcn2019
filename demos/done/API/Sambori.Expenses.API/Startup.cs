@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sambori.Expenses.API.Data;
+using Sambori.Expenses.API.Extensions;
 
 namespace Sambori.Expenses.API
 {
@@ -30,6 +31,30 @@ namespace Sambori.Expenses.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ExpensesContext>(opt => opt.UseInMemoryDatabase("ExpensesDb"));
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("ApproversOnly", policy =>
+                {
+                    policy.RequireRole("Approver");
+
+                    //validate token scopes:
+                    //https://blogs.msdn.microsoft.com/gianlucb/2017/12/05/azure-ad-scope-based-authorization/
+                    //https://joonasw.net/view/azure-ad-authentication-aspnet-core-api-part-2
+                    //https://github.com/juunas11/Joonasw.AzureAdApiSample/blob/master/Joonasw.AzureAdApiSample.Api/Extensions/AuthorizationPolicyBuilderExtensions.cs
+                    policy.RequireScope("https://inheritscloud.com/Sambori.Expenses.API/Expenses.Approve");
+
+
+                    //policy.RequireAssertion(context => context.User.IsInRole("Admin") 
+                    //                                   || context.User.IsInRole("Manager"));
+                });
+
+                options.AddPolicy("AdminsOnly", policy =>
+                {
+                    policy.RequireRole("Admin");
+                    policy.RequireScope("https://inheritscloud.com/Sambori.Expenses.API/Expenses.Manage.All");
+                });
+            });
 
             services.AddAuthentication(AzureADDefaults.BearerAuthenticationScheme)
                 .AddAzureADBearer(options => Configuration.Bind("AzureAd", options));
