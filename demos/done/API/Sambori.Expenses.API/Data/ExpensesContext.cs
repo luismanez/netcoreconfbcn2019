@@ -21,7 +21,17 @@ namespace Sambori.Expenses.API.Data
             modelBuilder.Entity<Expense>().HasData(
                 new Expense
                 {
-                    Id = Guid.NewGuid(), Amount = 100, Subject = "NetCoreConf hotel", User = "Luis"
+                    Id = Guid.NewGuid(),
+                    Amount = 100,
+                    Subject = "NetCoreConf hotel",
+                    User = "mjwatson@inheritscloud.onmicrosoft.com"
+                },
+                new Expense
+                {
+                    Id = Guid.NewGuid(),
+                    Amount = 25,
+                    Subject = "NetCoreConf dinner",
+                    User = "mjwatson@inheritscloud.onmicrosoft.com"
                 });
         }
     }

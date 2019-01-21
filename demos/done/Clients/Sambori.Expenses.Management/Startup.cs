@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Sambori.Expenses.Management.Http;
 
 namespace Sambori.Expenses.Management
 {
@@ -41,6 +42,10 @@ namespace Sambori.Expenses.Management
 
             // Token service
             services.AddTokenAcquisition();
+
+            services.AddHttpContextAccessor();
+
+            services.AddHttpClient<ExpensesApiHttpClient>();
 
             services.AddMvc(options =>
             {

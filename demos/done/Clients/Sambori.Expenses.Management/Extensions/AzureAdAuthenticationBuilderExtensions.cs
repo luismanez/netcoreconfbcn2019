@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
 using Sambori.Expenses.Management.Extensions;
 
 namespace Microsoft.AspNetCore.Authentication
@@ -43,12 +45,18 @@ namespace Microsoft.AspNetCore.Authentication
                     OnAuthorizationCodeReceived = OnAuthorizationCodeReceived
                 };
 
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    // This claim is in the Azure AD B2C token; this code tells the web app to "absorb" the token "name" and place it in the user object
+                    NameClaimType = "name"
+                };
+
                 options.Scope.Add("https://inheritscloud.com/Sambori.Expenses.API/Expenses.Manage.All");
                 options.Scope.Add("https://inheritscloud.com/Sambori.Expenses.API/Expenses.Read.All");
                 options.Scope.Add("https://inheritscloud.com/Sambori.Expenses.API/Expenses.Approve");
                 options.Scope.Add("https://inheritscloud.com/Sambori.Expenses.API/Expenses.Read");
 
-                options.ResponseType = "code id_token";
+                options.ResponseType = OpenIdConnectResponseType.CodeIdToken;
             }
 
             public void Configure(OpenIdConnectOptions options)

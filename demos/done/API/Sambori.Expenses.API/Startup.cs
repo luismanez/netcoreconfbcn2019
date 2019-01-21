@@ -8,11 +8,13 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.AzureAD.UI;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Sambori.Expenses.API.Data;
 using Sambori.Expenses.API.Extensions;
 
@@ -36,28 +38,53 @@ namespace Sambori.Expenses.API
             {
                 options.AddPolicy("ApproversOnly", policy =>
                 {
-                    policy.RequireRole("Approver");
-
                     //validate token scopes:
-                    //https://blogs.msdn.microsoft.com/gianlucb/2017/12/05/azure-ad-scope-based-authorization/
-                    //https://joonasw.net/view/azure-ad-authentication-aspnet-core-api-part-2
                     //https://github.com/juunas11/Joonasw.AzureAdApiSample/blob/master/Joonasw.AzureAdApiSample.Api/Extensions/AuthorizationPolicyBuilderExtensions.cs
-                    policy.RequireScope("https://inheritscloud.com/Sambori.Expenses.API/Expenses.Approve");
+                    policy.RequireScope("Expenses.Approve");
 
-
-                    //policy.RequireAssertion(context => context.User.IsInRole("Admin") 
-                    //                                   || context.User.IsInRole("Manager"));
+                    policy.RequireAssertion(context => context.User.IsInRole("Admin")
+                                                       || context.User.IsInRole("Approver"));
                 });
 
                 options.AddPolicy("AdminsOnly", policy =>
                 {
                     policy.RequireRole("Admin");
-                    policy.RequireScope("https://inheritscloud.com/Sambori.Expenses.API/Expenses.Manage.All");
+                    policy.RequireScope("Expenses.Manage.All");
                 });
             });
 
-            services.AddAuthentication(AzureADDefaults.BearerAuthenticationScheme)
+            services.AddAuthentication(AzureADDefaults.JwtBearerAuthenticationScheme)
                 .AddAzureADBearer(options => Configuration.Bind("AzureAd", options));
+
+            services.Configure<JwtBearerOptions>(AzureADDefaults.JwtBearerAuthenticationScheme, options =>
+            {
+                // This is an Azure AD v2.0 Web API
+                options.Authority += "/v2.0";
+
+                // The valid audiences are both the Client ID (options.Audience) and api://{ClientID}
+                options.TokenValidationParameters.ValidAudiences = new string[] { options.Audience, "https://inheritscloud.com/Sambori.Expenses.API" };
+
+                //// Instead of using the default validation (validating against a single tenant, as we do in line of business apps),
+                //// we inject our own multitenant validation logic (which even accepts both V1 and V2 tokens)
+                //options.TokenValidationParameters.IssuerValidator = AadIssuerValidator.ValidateAadIssuer;
+
+                //// When an access token for our own Web API is validated, we add it to MSAL.NET's cache so that it can
+                //// be used from the controllers.
+                //options.Events = new JwtBearerEvents();
+
+                //// If you want to debug, or just understand the JwtBearer events, uncomment the following line of code
+                //// options.Events = JwtBearerMiddlewareDiagnostics.Subscribe(options.Events);
+
+                //options.Events.OnTokenValidated = async context =>
+                //{
+                //    var tokenAcquisition = context.HttpContext.RequestServices.GetRequiredService<ITokenAcquisition>();
+                //    var scopes = new string[] { "user.read" };
+                //    context.Success();
+
+                //    // Adds the token to the cache, and also handles the incremental consent and claim challenges
+                //    tokenAcquisition.AddAccountToCacheFromJwt(context, scopes);
+                //};
+            });
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }

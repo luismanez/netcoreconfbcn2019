@@ -5,7 +5,11 @@
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
+    <h1 class="display-4">Your expenses @Model.UserName</h1>
+    <div>
+        @Model.Data
+    </div>
+    <h3>Token used:</h3>
     <p>
         @Model.AccessToken
     </p>

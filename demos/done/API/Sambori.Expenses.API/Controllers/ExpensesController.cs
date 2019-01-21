@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Sambori.Expenses.API.Data;
+using Sambori.Expenses.API.Extensions;
 using Sambori.Expenses.API.Models;
+using System;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Sambori.Expenses.API.Controllers
 {
@@ -45,6 +44,21 @@ namespace Sambori.Expenses.API.Controllers
             return Ok(data);
         }
 
+        [HttpGet("my")]
+        public async Task<IActionResult> GetMyExpenses()
+        {
+            var upn = User.GetDisplayName();
+
+            var data = await _context.Expenses.Where(e => e.User.Equals(upn)).ToListAsync();
+
+            if (data.Any())
+            {
+                return Ok(data);
+            }
+
+            return NotFound();            
+        }
+
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetById(Guid id)
         {
@@ -55,7 +69,7 @@ namespace Sambori.Expenses.API.Controllers
                 return NotFound();
             }
 
-            var upn = User.FindFirst(ClaimTypes.Upn)?.Value;
+            var upn = User.GetDisplayName();
 
             if (User.HasClaim(ClaimTypes.Role, "Admin") 
                 || User.HasClaim(ClaimTypes.Role, "Approver")
@@ -70,7 +84,7 @@ namespace Sambori.Expenses.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] Expense expense)
         {
-            var upn = User.FindFirst(ClaimTypes.Upn)?.Value;
+            var upn = User.GetDisplayName();
             expense.User = upn;
 
             await _context.Expenses.AddAsync(expense);
