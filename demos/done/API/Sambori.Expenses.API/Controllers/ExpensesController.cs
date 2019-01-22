@@ -8,6 +8,8 @@ using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Sambori.Expenses.API.Http;
 
 namespace Sambori.Expenses.API.Controllers
 {
@@ -17,10 +19,12 @@ namespace Sambori.Expenses.API.Controllers
     public class ExpensesController : ControllerBase
     {
         private readonly ExpensesContext _context;
+        private readonly MsGraphApiHttpClient _graphClient;
 
-        public ExpensesController(ExpensesContext context)
+        public ExpensesController(ExpensesContext context, MsGraphApiHttpClient graphClient)
         {
             _context = context;
+            _graphClient = graphClient;
 
             //force seeding Db
             _context.Database.EnsureCreated();
@@ -143,7 +147,17 @@ namespace Sambori.Expenses.API.Controllers
             _context.Expenses.Remove(data);
             await _context.SaveChangesAsync();
 
+            //Send email to some Admin user, just showing How to call another API flowing credentials (On Behalf Flow)
+            await SendEmailToFinanceAdmin(data);
+
             return NoContent();
+        }
+
+        private async Task SendEmailToFinanceAdmin(Expense data)
+        {
+            var message = $"Expense DELETED: {data}";
+
+            await _graphClient.SendEmail("luis@inheritscloud.com", message);
         }
     }
 }

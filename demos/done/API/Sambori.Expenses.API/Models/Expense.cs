@@ -28,5 +28,10 @@ namespace Sambori.Expenses.API.Models
             User = "anonymous";
             Status = ExpenseStatus.Pending;
         }
+
+        public override string ToString()
+        {
+            return $"[{Id}] - {Subject} ->{Amount} EUR by {User} Status: {Status.ToString()}";
+        }
     }
 }

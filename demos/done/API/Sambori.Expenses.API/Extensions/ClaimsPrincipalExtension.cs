@@ -4,7 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace Sambori.Expenses.API.Extensions
+namespace Microsoft.AspNetCore.Authentication
 {
     public static class ClaimsPrincipalExtension
     {
