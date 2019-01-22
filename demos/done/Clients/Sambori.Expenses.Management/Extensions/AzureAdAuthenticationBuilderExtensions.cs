@@ -47,14 +47,17 @@ namespace Microsoft.AspNetCore.Authentication
 
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    // This claim is in the Azure AD B2C token; this code tells the web app to "absorb" the token "name" and place it in the user object
+                    // This claim is in the Azure AD B2C token; this code tells the web app to "absorb" the token "name"
+                    // and place it in the user object
                     NameClaimType = "name"
                 };
 
-                options.Scope.Add("https://inheritscloud.com/Sambori.Expenses.API/Expenses.Manage.All");
-                options.Scope.Add("https://inheritscloud.com/Sambori.Expenses.API/Expenses.Read.All");
-                options.Scope.Add("https://inheritscloud.com/Sambori.Expenses.API/Expenses.Approve");
-                options.Scope.Add("https://inheritscloud.com/Sambori.Expenses.API/Expenses.Read");
+                // Asking Specific Scopes (However, this way won´t show the nested Consent)
+                //options.Scope.Add("https://inheritscloud.com/Sambori.Expenses.API/Expenses.Manage.All");
+                //options.Scope.Add("https://inheritscloud.com/Sambori.Expenses.API/Expenses.Read");
+
+                // Asking for all permissions defined in the API (if API requires permissions, will be shown in the Consent screen too)
+                options.Scope.Add("https://inheritscloud.com/Sambori.Expenses.API/.default");
 
                 options.ResponseType = OpenIdConnectResponseType.CodeIdToken;
             }
@@ -66,14 +69,19 @@ namespace Microsoft.AspNetCore.Authentication
 
             private async Task OnAuthorizationCodeReceived(AuthorizationCodeReceivedContext context)
             {
-                await _tokenAcquisition.AddAccountToCacheFromAuthorizationCode(context, 
+                await _tokenAcquisition.AddAccountToCacheFromAuthorizationCode(context,
                     new[]
                     {
-                        "https://inheritscloud.com/Sambori.Expenses.API/Expenses.Manage.All",
-                        "https://inheritscloud.com/Sambori.Expenses.API/Expenses.Read.All",
-                        "https://inheritscloud.com/Sambori.Expenses.API/Expenses.Approve",
-                        "https://inheritscloud.com/Sambori.Expenses.API/Expenses.Read"
+                        "https://inheritscloud.com/Sambori.Expenses.API/.default"
                     });
+                //await _tokenAcquisition.AddAccountToCacheFromAuthorizationCode(context, 
+                //    new[]
+                //    {
+                //        "https://inheritscloud.com/Sambori.Expenses.API/Expenses.Manage.All",
+                //        "https://inheritscloud.com/Sambori.Expenses.API/Expenses.Read.All",
+                //        "https://inheritscloud.com/Sambori.Expenses.API/Expenses.Approve",
+                //        "https://inheritscloud.com/Sambori.Expenses.API/Expenses.Read"
+                //    });
             }
         }
     }

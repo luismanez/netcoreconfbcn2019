@@ -6,6 +6,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 
 namespace Sambori.Expenses.API.Http
 {
@@ -37,24 +38,66 @@ namespace Sambori.Expenses.API.Http
 
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            var json = string.Format(@"{
-                          ""message"": {
-                            ""subject"": ""Meet for lunch?"",
-                            ""body"": {
-                              ""contentType"": ""Text"",
-                              ""content"": ""{0}""
-                            },
-                            ""toRecipients"": [
-                              {
-                                ""emailAddress"": {
-                                  ""address"": ""{1}""
-                                }
-                              }
-                            ]
-                          }
-                        }", message, to);
+            var sendMailRequestMessage = new GraphSendMailRequest
+            {
+                Message = new Message
+                {
+                    Subject = "Expenses DELETED in system!!",
+                    Body = new Body
+                    {
+                        Content = message,
+                        ContentType = "Text"
+                    },
+                    ToRecipients = new List<ToRecipient>
+                    {
+                        new ToRecipient
+                        {
+                            EmailAddress = new EmailAddress { Address = to }
+                        }
+                    }
+                }
+            };
 
-            var response = await _httpClient.PostAsJsonAsync<string>("/me/sendMail", json);
+            var response = await _httpClient.PostAsJsonAsync("/v1.0/me/sendMail", sendMailRequestMessage);
         }
+    }
+
+    public class GraphSendMailRequest
+    {
+        [JsonProperty("message", NullValueHandling = NullValueHandling.Ignore)]
+        public Message Message { get; set; }
+    }
+
+    public class Message
+    {
+        [JsonProperty("subject", NullValueHandling = NullValueHandling.Ignore)]
+        public string Subject { get; set; }
+
+        [JsonProperty("body", NullValueHandling = NullValueHandling.Ignore)]
+        public Body Body { get; set; }
+
+        [JsonProperty("toRecipients", NullValueHandling = NullValueHandling.Ignore)]
+        public List<ToRecipient> ToRecipients { get; set; }
+    }
+
+    public class Body
+    {
+        [JsonProperty("contentType", NullValueHandling = NullValueHandling.Ignore)]
+        public string ContentType { get; set; }
+
+        [JsonProperty("content", NullValueHandling = NullValueHandling.Ignore)]
+        public string Content { get; set; }
+    }
+
+    public class ToRecipient
+    {
+        [JsonProperty("emailAddress", NullValueHandling = NullValueHandling.Ignore)]
+        public EmailAddress EmailAddress { get; set; }
+    }
+
+    public class EmailAddress
+    {
+        [JsonProperty("address", NullValueHandling = NullValueHandling.Ignore)]
+        public string Address { get; set; }
     }
 }
