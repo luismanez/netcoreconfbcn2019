@@ -40,7 +40,7 @@ namespace Sambori.Expenses.API.Controllers
         }
 
         [HttpGet("all")]
-        [Authorize("AdminsOnly")]
+        [Authorize("ApproversOnly")]
         public async Task<IActionResult> GetAll()
         {
             var data = await _context.Expenses.ToListAsync();

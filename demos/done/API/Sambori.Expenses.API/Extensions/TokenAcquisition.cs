@@ -316,8 +316,11 @@ namespace Microsoft.AspNetCore.Authentication
 
                 var application = CreateApplication(httpContext, principal, properties, null);
 
+                //TODO: At this point, we can arrive from a specific User, or from an App (i.e: Daemon calling API)
+                // we need to know if the ClientId is from our daemon, so we have to request a Token for Graph using Client Credentials
+
                 // Synchronous call to make sure that the cache is filled-in before the controller tries to get access tokens
-                AuthenticationResult result = application.AcquireTokenOnBehalfOfAsync(scopes.Except(_scopesRequestedByMsalNet), userAssertion).GetAwaiter().GetResult();
+                var result = application.AcquireTokenOnBehalfOfAsync(scopes.Except(_scopesRequestedByMsalNet), userAssertion).GetAwaiter().GetResult();
             }
             catch (MsalUiRequiredException ex)
             {

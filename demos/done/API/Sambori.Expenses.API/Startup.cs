@@ -89,7 +89,9 @@ namespace Sambori.Expenses.API
                 options.Events.OnTokenValidated = async context =>
                 {
                     var tokenAcquisition = context.HttpContext.RequestServices.GetRequiredService<ITokenAcquisition>();
-                    var scopes = new[] { "Mail.Send" };
+                    //var scopes = new[] { "Mail.Send" };
+                    var scopes = new[] { "https://graph.microsoft.com/.default" };
+
                     context.Success();
 
                     // Adds the token to the cache, and also handles the incremental consent and claim challenges
