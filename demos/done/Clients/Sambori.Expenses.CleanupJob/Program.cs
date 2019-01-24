@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Newtonsoft.Json;
+using Sambori.Expenses.CleanupJob.Models;
 
 namespace Sambori.Expenses.CleanupJob
 {
@@ -49,7 +52,18 @@ namespace Sambori.Expenses.CleanupJob
 
                 var json = await httpClient.GetStringAsync("https://localhost:44382/api/expenses/all");
 
-                Console.WriteLine(json);
+                var expenses = JsonConvert.DeserializeObject<IEnumerable<Expense>>(json);
+
+                foreach (var expense in expenses)
+                {
+                    Console.WriteLine(expense);
+                    if (expense.Amount < 0)
+                    {
+                        Console.Write("DELETING...{0}...", expense);
+                        var response = await httpClient.DeleteAsync($"https://localhost:44382/api/expenses/{expense.Id}");
+                        Console.WriteLine(response.StatusCode);
+                    }
+                }                
             }
             catch (MsalServiceException ex) when (ex.Message.Contains("AADSTS70011"))
             {

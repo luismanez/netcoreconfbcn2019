@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -32,9 +33,23 @@ namespace Sambori.Expenses.API.Http
         {
             string[] scopes = { "Mail.Send" };
 
-            var token = await _tokenAcquisition.GetAccessTokenOnBehalfOfUser(
-                _httpContextAccessor.HttpContext,
-                scopes);
+            string token;
+            string sendMailEndpoint;
+            if (_httpContextAccessor.HttpContext.User.FindFirstValue("azp") == "e2b3ebbd-91a3-4bee-ae3a-2667e02f3ba4")
+            {
+                // As an App, we need an App token for Graph,
+                // and a specific User ID to send the email (kind of service account to send the email as that User)
+                token = await _tokenAcquisition.GetAccessTokenForApp();
+                sendMailEndpoint = "users/23a5c189-32af-45c7-b10f-a6bf1aac7345";
+            }
+            else
+            {
+                token = await _tokenAcquisition.GetAccessTokenOnBehalfOfUser(
+                    _httpContextAccessor.HttpContext,
+                    scopes);
+
+                sendMailEndpoint = "me";
+            }            
 
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -58,7 +73,7 @@ namespace Sambori.Expenses.API.Http
                 }
             };
 
-            var response = await _httpClient.PostAsJsonAsync("/v1.0/me/sendMail", sendMailRequestMessage);
+            var response = await _httpClient.PostAsJsonAsync($"/v1.0/{sendMailEndpoint}/sendMail", sendMailRequestMessage);
         }
     }
 

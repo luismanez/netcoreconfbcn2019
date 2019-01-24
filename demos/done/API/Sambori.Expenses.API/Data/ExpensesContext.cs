@@ -32,6 +32,20 @@ namespace Sambori.Expenses.API.Data
                     Amount = 25,
                     Subject = "NetCoreConf dinner",
                     User = "mjwatson@inheritscloud.onmicrosoft.com"
+                },
+                new Expense
+                {
+                    Id = Guid.Parse("eeeb22b4-c3b8-45a1-bfe0-ae41498b3517"),
+                    Amount = 2500,
+                    Subject = "Flight to Seattle",
+                    User = "nosborn@inheritscloud.onmicrosoft.com"
+                },
+                new Expense
+                {
+                    Id = Guid.Parse("0da52742-524a-48c6-a45e-6ad9dbd236bd"),
+                    Amount = -10,
+                    Subject = "Visit to Contoso offices",
+                    User = "fhardy@inheritscloud.onmicrosoft.com"
                 });
         }
     }

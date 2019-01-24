@@ -245,6 +245,30 @@ namespace Microsoft.AspNetCore.Authentication
             return app;
         }
 
+        private ConfidentialClientApplication CreateApplicationUsingClientCredentials()
+        {
+            var clientCredentials = new ClientCredential(_azureAdOptions.ClientSecret);
+
+            var app = new ConfidentialClientApplication(
+                _azureAdOptions.ClientId,
+                $"{_azureAdOptions.Instance}{_azureAdOptions.TenantId}/v2.0",
+                "https://NOT_APPLY_AS_IS_DAEMON",
+                clientCredentials,
+                null,
+                new TokenCache());
+
+            return app;
+        }
+
+        public async Task<string> GetAccessTokenForApp()
+        {
+            var app = CreateApplicationUsingClientCredentials();
+
+            var result = await app.AcquireTokenForClientAsync(new[] {"https://graph.microsoft.com/.default"});
+
+            return result.AccessToken;
+        }
+
 
 
         /// <summary>
@@ -297,7 +321,12 @@ namespace Microsoft.AspNetCore.Authentication
         /// <summary>
         /// Adds an account to the token cache from a JWT token and other parameters related to the token cache implementation
         /// </summary>
-        private void AddAccountToCacheFromJwt(IEnumerable<string> scopes, JwtSecurityToken jwtToken, AuthenticationProperties properties, ClaimsPrincipal principal, HttpContext httpContext)
+        private void AddAccountToCacheFromJwt(
+            IEnumerable<string> scopes, 
+            JwtSecurityToken jwtToken, 
+            AuthenticationProperties properties, 
+            ClaimsPrincipal principal, 
+            HttpContext httpContext)
         {
             try
             {
@@ -312,15 +341,24 @@ namespace Microsoft.AspNetCore.Authentication
                 {
                     throw new ArgumentOutOfRangeException("tokenValidationContext.SecurityToken should be a JWT Token");
                     // TODO: Understand if we could support other kind of client assertions (SAML);
+                }                
+
+                // At this point, we can arrive from a specific User, or from an App (i.e: Daemon calling API)
+                var appClientIdClaim = principal.FindFirstValue("azp");
+                if (appClientIdClaim == "e2b3ebbd-91a3-4bee-ae3a-2667e02f3ba4")
+                {
+                    // ClientId is from our daemon, so we have to request a Token for Graph using Client Credentials
+                    // as On behalf of flow doesn´t work with App Client credentials in V2 (yet)
+                    var application = CreateApplicationUsingClientCredentials();
+
+                    var result = application.AcquireTokenForClientAsync(scopes.Except(_scopesRequestedByMsalNet)).GetAwaiter().GetResult();
                 }
-
-                var application = CreateApplication(httpContext, principal, properties, null);
-
-                //TODO: At this point, we can arrive from a specific User, or from an App (i.e: Daemon calling API)
-                // we need to know if the ClientId is from our daemon, so we have to request a Token for Graph using Client Credentials
-
-                // Synchronous call to make sure that the cache is filled-in before the controller tries to get access tokens
-                var result = application.AcquireTokenOnBehalfOfAsync(scopes.Except(_scopesRequestedByMsalNet), userAssertion).GetAwaiter().GetResult();
+                else
+                {
+                    var application = CreateApplication(httpContext, principal, properties, null);
+                    // Synchronous call to make sure that the cache is filled-in before the controller tries to get access tokens
+                    var result = application.AcquireTokenOnBehalfOfAsync(scopes.Except(_scopesRequestedByMsalNet), userAssertion).GetAwaiter().GetResult();
+                }                
             }
             catch (MsalUiRequiredException ex)
             {

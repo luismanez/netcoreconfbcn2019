@@ -8,6 +8,8 @@ namespace Microsoft.AspNetCore.Authentication
 {
     public interface ITokenAcquisition
     {
+        Task<string> GetAccessTokenForApp();
+
         /// <summary>
         /// In a Web App, adds, to the MSAL.NET cache, the account of the user authenticating to the Web App, when the authorization code is received (after the user
         /// signed-in and consented)
