@@ -328,3 +328,7 @@ ASALocalRun/
 
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
+/demos/done/API/Sambori.Expenses.API/appsettingshide.Development.json
+/demos/done/Clients/Sambori.Expenses.CleanupJob/appsettingshide.json
+/demos/done/Clients/Sambori.Expenses.Management/appsettingshide.json
+/demos/done/API/Sambori.Expenses.API/appsettingshide.json

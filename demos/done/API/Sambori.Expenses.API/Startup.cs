@@ -73,7 +73,8 @@ namespace Sambori.Expenses.API
                 options.Authority += "/v2.0";
 
                 // The valid audiences are both the Client ID (options.Audience) and api URI
-                options.TokenValidationParameters.ValidAudiences = new string[] { options.Audience, "https://inheritscloud.com/Sambori.Expenses.API" };
+                options.TokenValidationParameters.ValidAudiences = 
+                    new string[] { options.Audience, "https://inheritscloud.com/Sambori.Expenses.API" };
 
                 //// Instead of using the default validation (validating against a single tenant, as we do in line of business apps),
                 //// we inject our own multitenant validation logic (which even accepts both V1 and V2 tokens)
